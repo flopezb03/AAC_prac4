@@ -73,6 +73,9 @@ class Board:
         self.h = h
         self.w = w
         self.board = [[Square(j,i) for j in range(w)] for i in range(h)]
+        for x in range(w):
+            for y in range(h):
+                self.board[y][x].adjacent_squares = self.adjacent_squares(x,y)
 
     def is_square_empty(self,x, y):
         return self.board[y][x].animal is None
@@ -92,7 +95,6 @@ class Board:
         self.board[y][x].animal = a
         a.x = x
         a.y = y
-        a.update_adjacent_squares()
 
     def __str__(self):
         out = ""
@@ -112,6 +114,7 @@ class Square:
     def __init__(self,x,y):
         self.x = x
         self.y = y
+        self.adjacent_squares = []
         self.animal = None
         self.lock = threading.Lock()
 
@@ -122,8 +125,8 @@ class Square:
             self.animal = a
             return True
         return False
-    def is_group_adjacent(self,animal,group,adjacent_squares):
-        for s in adjacent_squares:
+    def is_group_adjacent(self,animal,group):
+        for s in self.adjacent_squares:
             if s.animal is not None and s.animal != animal and s.animal.group == group:
                 return True
         return False

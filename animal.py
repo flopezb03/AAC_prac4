@@ -14,10 +14,6 @@ class Animal(threading.Thread):
         self.y = None
         self.speed = 0
         self.rest_time = 0
-        self.adjacent_squares = []
-
-    def update_adjacent_squares(self):
-        self.adjacent_squares = self.board.adjacent_squares(self.x,self.y)
 
 
     def inspect(self):
@@ -36,9 +32,9 @@ class Animal(threading.Thread):
         #   Buscar donde moverse
         dest_in_group = []
         dest_out_group = []
-        for s in self.adjacent_squares:
+        for s in self.board.board[self.y][self.x].adjacent_squares:
             if s.is_empty():
-                if s.is_group_adjacent(self,self.group,self.board.adjacent_squares(s.x,s.y)):
+                if s.is_group_adjacent(self,self.group):
                     dest_in_group.append(s)
                 else:
                     dest_out_group.append(s)
@@ -75,7 +71,6 @@ class Animal(threading.Thread):
             self.board.board[self.y][self.x].animal = None
             self.x = dest.x
             self.y = dest.y
-            self.update_adjacent_squares()
             #actualizar manada
             print(self.board)
         print(f"{self.a_id} suelta lock({dest.x},{dest.y})")
