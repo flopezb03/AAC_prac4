@@ -83,9 +83,29 @@ class Animal(threading.Thread):
 
 class Predator(Animal):
     def hunt(self):
-        pass
+        #   Buscar que cazar
+        possible_preys = []
+        for s in self.board.board[self.y][self.x].adjacent_squares:
+            if not s.is_empty() and self.can_hunt(s):
+                possible_preys.append(s)
+        if len(possible_preys) == 0:
+            return False
 
-    def can_hunt(self):
+        #   Decidir que cazar
+        r = random.randint(0,len(possible_preys)-1)
+        prey = possible_preys[r]
+
+        #   Realizar caza
+        prey.lock.acquire()
+        prey.animal.hunted = True
+        prey.animal = self
+        self.board.board[self.y][self.x].animal = None
+        self.x = prey.x
+        self.y = prey.y
+        prey.lock.release()
+        return True
+
+    def can_hunt(self, prey):
         pass
 
 class Prey(Animal):
@@ -99,11 +119,28 @@ class Lion(Predator):
         self.speed = 0.3
         self.rest_time = 1
 
+    def can_hunt(self, prey):
+        if isinstance(prey.animal,Zebra):
+            return True
+        elif isinstance(prey.animal,Hyena):
+            allies = 0
+            hyenas = 0
+            for s in self.board.board[self.y][self.x].adjacent_squares:
+                if isinstance(s.animal,Lion):
+                    allies += 1
+            for s in prey.adjacent_squares:
+                if isinstance(s.animal,Hyena):
+                    hyenas +=1
+            return allies >= hyenas
+        else:
+            return False
+
     def run(self):
         x = 10
         while not self.winner and x > 0:
-            if not self.move():
-                self.rest()
+            if not self.hunt():
+                if not self.move():
+                    self.rest()
             sleep(self.speed)
             x -= 1
 
@@ -112,11 +149,27 @@ class Hyena(Predator, Prey):
         super().__init__(a_id, group, board, winner)
         self.speed = 0.9
         self.rest_time = 0.7
+
+    def can_hunt(self, prey):
+        if isinstance(prey.animal,Zebra):
+            allies = 0
+            zebras = 0
+            for s in self.board.board[self.y][self.x].adjacent_squares:
+                if isinstance(s.animal,Hyena):
+                    allies += 1
+            for s in prey.adjacent_squares:
+                if isinstance(s.animal,Zebra):
+                    zebras +=1
+            return allies >= zebras
+        else:
+            return False
+
     def run(self):
         x = 10
         while not self.hunted and not self.winner and x > 0:
-            if not self.move():
-                self.rest()
+            if not self.hunt():
+                if not self.move():
+                    self.rest()
             sleep(self.speed)
             x -= 1
 

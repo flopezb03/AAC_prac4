@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5258d976-4535-406e-95ca-f8a4de2b5184" name="Changes" comment="adjacent_squares is now a Square attribute">
+    <list default="true" id="5258d976-4535-406e-95ca-f8a4de2b5184" name="Changes" comment="all animal types can &quot;work&quot;">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/animal.py" beforeDir="false" afterPath="$PROJECT_DIR$/animal.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/enviroment.py" beforeDir="false" afterPath="$PROJECT_DIR$/enviroment.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -95,12 +94,21 @@
       <option name="project" value="LOCAL" />
       <updated>1731773201333</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="all animal types can &quot;work&quot;">
+      <option name="closed" value="true" />
+      <created>1731776231766</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1731776231766</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Base + move out of group behaviour" />
     <MESSAGE value="adjacent_squares is now a Square attribute" />
-    <option name="LAST_COMMIT_MESSAGE" value="adjacent_squares is now a Square attribute" />
+    <MESSAGE value="all animal types can &quot;work&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="all animal types can &quot;work&quot;" />
   </component>
 </project>
