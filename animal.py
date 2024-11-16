@@ -5,7 +5,7 @@ from time import sleep
 
 class Animal(threading.Thread):
     def __init__(self, a_id, group, board, winner):
-        super().__init__(group)
+        super().__init__()
         self.a_id = a_id
         self.group = group
         self.board = board
@@ -75,10 +75,11 @@ class Animal(threading.Thread):
             print(self.board)
         print(f"{self.a_id} suelta lock({dest.x},{dest.y})")
         dest.lock.release()
+        return moved
 
 
     def rest(self):
-        pass
+        sleep(self.rest_time)
 
 class Predator(Animal):
     def hunt(self):
@@ -95,19 +96,43 @@ class Prey(Animal):
 class Lion(Predator):
     def __init__(self, a_id, group, board, winner):
         super().__init__(a_id, group, board, winner)
-        self.speed = 0.2
+        self.speed = 0.3
+        self.rest_time = 1
 
     def run(self):
         x = 10
         while not self.winner and x > 0:
-            self.move()
+            if not self.move():
+                self.rest()
             sleep(self.speed)
             x -= 1
 
 class Hyena(Predator, Prey):
-    pass
+    def __init__(self, a_id, group, board, winner):
+        super().__init__(a_id, group, board, winner)
+        self.speed = 0.9
+        self.rest_time = 0.7
+    def run(self):
+        x = 10
+        while not self.hunted and not self.winner and x > 0:
+            if not self.move():
+                self.rest()
+            sleep(self.speed)
+            x -= 1
+
 class Zebra(Prey):
-    pass
+    def __init__(self, a_id, group, board, winner):
+        super().__init__(a_id, group, board, winner)
+        self.speed = 0.5
+        self.rest_time = 0.2
+
+    def run(self):
+        x = 10
+        while not self.hunted and not self.winner and x > 0:
+            if not self.move():
+                self.rest()
+            sleep(self.speed)
+            x -= 1
 
 class Group:
     def __init__(self, g_id):

@@ -1,6 +1,6 @@
 import threading
 
-from animal import PredatorGroup, Lion
+from animal import PredatorGroup, Lion, Group, Zebra, Hyena
 
 
 class Game:
@@ -22,6 +22,10 @@ class Game:
         a_id = self.animal_id
         self.animal_id = a_id+1
         return a_id
+    def create_animal(self,animal_type,group,x,y):
+        animal = animal_type(self.incc_animal_id(),group,self.board,self.winner)
+        self.board.spawn_animal(x,y,animal)
+        group.animals.append(animal)
 
 
     def start(self):
@@ -35,8 +39,8 @@ class Game:
             w = int(input())
             self.board = Board(h, w)
         elif c == 'n':
-            h = 10
-            w = 10
+            h = 7
+            w = 7
             self.board = Board(h, w)
         else:
             print("Saliendo del programa...")
@@ -45,27 +49,31 @@ class Game:
 
 
 
-        lion_group1 = PredatorGroup(0)
+        lion_group1 = PredatorGroup(self.incc_group_id())
         self.lions.append(lion_group1)
-        lion1 = Lion("1", None, self.board, self.winner)
-        lion1.group = lion_group1
-        self.board.spawn_animal(0, 0, lion1)
-        lion_group1.animals.append(lion1)
+        positions = [(0,0),(1,0),(0,1)]
+        for p in positions:
+            self.create_animal(Lion,lion_group1,p[0],p[1])
 
-        lion2 = Lion("2", None, self.board, self.winner)
-        lion2.group = lion_group1
-        self.board.spawn_animal(1, 0, lion2)
-        lion_group1.animals.append(lion2)
+        zebra_group1 = Group(self.incc_group_id())
+        self.zebras.append(zebra_group1)
+        positions = [(2, 0), (2, 1), (2, 2)]
+        for p in positions:
+            self.create_animal(Zebra,zebra_group1, p[0], p[1])
 
-        lion3 = Lion("3", None, self.board, self.winner)
-        lion3.group = lion_group1
-        self.board.spawn_animal(0, 1, lion3)
-        lion_group1.animals.append(lion3)
+
+
 
         for t in self.lions[0].animals:
             t.start()
+        for t in self.zebras[0].animals:
+            t.start()
         for t in self.lions[0].animals:
             t.join()
+        for t in self.zebras[0].animals:
+            t.join()
+
+
 
 
 class Board:
@@ -133,7 +141,12 @@ class Square:
 
     def __str__(self):
         if self.animal is not None:
-            return str(self.animal.a_id)
+            if isinstance(self.animal,Lion):
+                return "L"
+            elif isinstance(self.animal,Zebra):
+                return "Z"
+            elif isinstance(self.animal,Hyena):
+                return "H"
         else:
             return "."
 
