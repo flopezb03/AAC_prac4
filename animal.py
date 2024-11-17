@@ -16,6 +16,7 @@ class Animal(threading.Thread):
         self.rest_time = 0
 
 
+
     def inspect(self):
         possible_squares = []
         for i in range(-1, 2):
@@ -29,6 +30,11 @@ class Animal(threading.Thread):
             return False
 
     def move(self):
+        self.board.board[self.y][self.x].lock.acquire()
+        if isinstance(self,Prey) and self.hunted == True:
+            self.board.board[self.y][self.x].lock.release()
+            return False
+
         #   Buscar donde moverse
         dest_in_group = []
         dest_out_group = []
@@ -40,6 +46,7 @@ class Animal(threading.Thread):
                     dest_out_group.append(s)
         if len(dest_out_group) == 0 and len(dest_in_group) == 0:
             print(f"{self.a_id} no se puede mover")
+            self.board.board[self.y][self.x].lock.release()
             return False
 
         #   Decidir donde moverse
@@ -63,18 +70,24 @@ class Animal(threading.Thread):
         dest = possible_destinations[r]
 
         #   Realizar movimiento
-        print(f"{self.a_id} quiere lock({dest.x},{dest.y})")
+        print(f"{self.a_id} quiere lock({dest.x},{dest.y}) para mover")
         dest.lock.acquire()
-        print(f"{self.a_id} tiene lock({dest.x},{dest.y})")
+        print(f"{self.a_id} tiene lock({dest.x},{dest.y}) para mover")
         moved = dest.set_animal(self)
         if moved:
             self.board.board[self.y][self.x].animal = None
+            x_aux = self.x
             self.x = dest.x
+            y_aux = self.y
             self.y = dest.y
             #actualizar manada
             print(self.board)
         print(f"{self.a_id} suelta lock({dest.x},{dest.y})")
         dest.lock.release()
+        if moved:
+            self.board.board[y_aux][x_aux].lock.release()
+        else:
+            self.board.board[self.y][self.x].lock.release()
         return moved
 
 
@@ -83,12 +96,19 @@ class Animal(threading.Thread):
 
 class Predator(Animal):
     def hunt(self):
+        self.board.board[self.y][self.x].lock.acquire()
+        if isinstance(self,Prey) and self.hunted == True:
+            self.board.board[self.y][self.x].lock.release()
+            return False
+
         #   Buscar que cazar
         possible_preys = []
         for s in self.board.board[self.y][self.x].adjacent_squares:
             if not s.is_empty() and self.can_hunt(s):
                 possible_preys.append(s)
         if len(possible_preys) == 0:
+            print(f"{self.a_id} no puede cazar")
+            self.board.board[self.y][self.x].lock.release()
             return False
 
         #   Decidir que cazar
@@ -96,14 +116,26 @@ class Predator(Animal):
         prey = possible_preys[r]
 
         #   Realizar caza
+        print(f"{self.a_id} quiere lock({prey.x},{prey.y}) para cazar")
         prey.lock.acquire()
-        prey.animal.hunted = True
-        prey.animal = self
-        self.board.board[self.y][self.x].animal = None
-        self.x = prey.x
-        self.y = prey.y
+        print(f"{self.a_id} tiene lock({prey.x},{prey.y}) para cazar")
+        hunt = not prey.is_empty() and self.can_hunt(prey)
+        if hunt:
+            prey.animal.hunted = True
+            prey.animal = self
+            self.board.board[self.y][self.x].animal = None
+            x_aux = self.x
+            self.x = prey.x
+            y_aux = self.y
+            self.y = prey.y
+            print(self.board)
+        print(f"{self.a_id} suelta lock({prey.x},{prey.y})")
         prey.lock.release()
-        return True
+        if hunt:
+            self.board.board[y_aux][x_aux].lock.release()
+        else:
+            self.board.board[self.y][self.x].lock.release()
+        return hunt
 
     def can_hunt(self, prey):
         pass

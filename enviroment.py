@@ -39,8 +39,8 @@ class Game:
             w = int(input())
             self.board = Board(h, w)
         elif c == 'n':
-            h = 7
-            w = 7
+            h = 4
+            w = 4
             self.board = Board(h, w)
         else:
             print("Saliendo del programa...")
@@ -55,6 +55,12 @@ class Game:
         for p in positions:
             self.create_animal(Lion,lion_group1,p[0],p[1])
 
+        hyena_group1 = PredatorGroup(self.incc_group_id())
+        self.hyenas.append(hyena_group1)
+        positions = [(3, 0), (3, 1), (3, 2)]
+        for p in positions:
+            self.create_animal(Hyena, hyena_group1, p[0], p[1])
+
         zebra_group1 = Group(self.incc_group_id())
         self.zebras.append(zebra_group1)
         positions = [(2, 0), (2, 1), (2, 2)]
@@ -66,9 +72,13 @@ class Game:
 
         for t in self.lions[0].animals:
             t.start()
+        for t in self.hyenas[0].animals:
+            t.start()
         for t in self.zebras[0].animals:
             t.start()
         for t in self.lions[0].animals:
+            t.join()
+        for t in self.hyenas[0].animals:
             t.join()
         for t in self.zebras[0].animals:
             t.join()
