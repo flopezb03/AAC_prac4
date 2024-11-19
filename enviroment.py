@@ -1,31 +1,60 @@
+import queue
+import random
 import threading
+import time
 
 from animal import PredatorGroup, Lion, Group, Zebra, Hyena
 
 
 class Game:
     def __init__(self):
-        self.lions = []
-        self.hyenas = []
-        self.zebras = []
+        self.lions = {}
+        self.hyenas = {}
+        self.zebras = {}
         self.winner = False
         self.winner_id = None
+        self.winner_lock = threading.Lock()
         self.board = None
         self.group_id = 0
         self.animal_id = 0
+        self.events = queue.Queue()
 
     def incc_group_id(self):
         g_id = self.group_id
-        self.group_id = g_id+1
+        self.group_id += 1
         return g_id
     def incc_animal_id(self):
         a_id = self.animal_id
-        self.animal_id = a_id+1
+        self.animal_id += 1
         return a_id
     def create_animal(self,animal_type,group,x,y):
-        animal = animal_type(self.incc_animal_id(),group,self.board,self.winner)
+        self.board.board[y][x].lock.acquire()
+        animal = animal_type(self.incc_animal_id(),group,self.board,self.winner,self.winner_id,self.winner_lock,self.events)
         self.board.spawn_animal(x,y,animal)
         group.animals.append(animal)
+        self.board.board[y][x].lock.release()
+        return animal
+
+    def event_listener(self):
+        while not self.winner:
+            #time.sleep(0.1)
+            event,animal = self.events.get()
+            if event == "Spawn Zebra":
+                print("-------------------- SPAWN ZEBRA --------------------------------------------------------------")
+                #   Crear nueva cebra
+                group = Group(self.incc_group_id())
+                self.zebras[group.g_id] = group
+                x, y = random.randint(0, self.board.w - 1), random.randint(0, self.board.h - 1)
+                while not self.board.is_square_empty(x, y):  # Buscar un lugar vacío
+                    x, y = random.randint(0, self.board.w - 1), random.randint(0, self.board.h - 1)
+
+                t = self.create_animal(Zebra, group, x, y)
+                t.start()                                                                   #   Falta hacer join
+            elif event == "Winner":
+                self.winner = True
+                self.winner_id = animal.group.g_id
+                print("-------------------- GANADOR --------------------------------------------------------------")
+
 
 
     def start(self):
@@ -46,42 +75,51 @@ class Game:
             print("Saliendo del programa...")
             exit()
 
+        listener_thread = threading.Thread(target=self.event_listener, daemon=False)
+        listener_thread.start()
 
-
+        threads = []
 
         lion_group1 = PredatorGroup(self.incc_group_id())
-        self.lions.append(lion_group1)
+        self.lions[lion_group1.g_id] = lion_group1
         positions = [(0,0),(1,0),(0,1)]
         for p in positions:
-            self.create_animal(Lion,lion_group1,p[0],p[1])
+            threads.append(self.create_animal(Lion,lion_group1,p[0],p[1]))
 
         hyena_group1 = PredatorGroup(self.incc_group_id())
-        self.hyenas.append(hyena_group1)
+        self.hyenas[hyena_group1.g_id] = hyena_group1
         positions = [(3, 0), (3, 1), (3, 2)]
         for p in positions:
-            self.create_animal(Hyena, hyena_group1, p[0], p[1])
+            threads.append(self.create_animal(Hyena, hyena_group1, p[0], p[1]))
 
         zebra_group1 = Group(self.incc_group_id())
-        self.zebras.append(zebra_group1)
+        self.zebras[zebra_group1.g_id] = zebra_group1
         positions = [(2, 0), (2, 1), (2, 2)]
         for p in positions:
-            self.create_animal(Zebra,zebra_group1, p[0], p[1])
+            threads.append(self.create_animal(Zebra,zebra_group1, p[0], p[1]))
 
 
 
 
-        for t in self.lions[0].animals:
+        for t in threads:
             t.start()
-        for t in self.hyenas[0].animals:
-            t.start()
-        for t in self.zebras[0].animals:
-            t.start()
-        for t in self.lions[0].animals:
+
+        for t in threads:
             t.join()
-        for t in self.hyenas[0].animals:
-            t.join()
-        for t in self.zebras[0].animals:
-            t.join()
+        listener_thread.join()
+
+        print(f"Ganador g_id: {self.winner_id}")
+        print("Lions:")
+        for lg in self.lions.values():
+            print(len(lg.animals))
+        print("Hyenas:")
+        for lg in self.hyenas.values():
+            print(len(lg.animals))
+        print("Zebras:")
+        for lg in self.zebras.values():
+            if lg is not None:
+                print(len(lg.animals))
+
 
 
 

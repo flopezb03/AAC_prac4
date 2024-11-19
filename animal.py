@@ -4,16 +4,19 @@ from time import sleep
 
 
 class Animal(threading.Thread):
-    def __init__(self, a_id, group, board, winner):
+    def __init__(self, a_id, group, board, winner, winner_id, winner_lock, q):
         super().__init__()
         self.a_id = a_id
         self.group = group
         self.board = board
         self.winner = winner
+        self.winner_id = winner_id
+        self.winner_lock = winner_lock
         self.x = None
         self.y = None
         self.speed = 0
         self.rest_time = 0
+        self.event_queue = q
 
 
 
@@ -81,7 +84,8 @@ class Animal(threading.Thread):
             y_aux = self.y
             self.y = dest.y
             #actualizar manada
-            print(self.board)
+            if not self.winner:
+                print(self.board)
         print(f"{self.a_id} suelta lock({dest.x},{dest.y})")
         dest.lock.release()
         if moved:
@@ -128,7 +132,18 @@ class Predator(Animal):
             self.x = prey.x
             y_aux = self.y
             self.y = prey.y
-            print(self.board)
+            if not self.winner:
+                print(self.board)
+            self.group.lock.acquire()
+            self.group.hunts += 1
+            if self.group.hunts >= 4 and not self.winner_lock.locked():
+                self.winner_lock.acquire()
+                self.winner = True
+                print("-------------------------------------------------- GANADOR ------------------------------------------------------------")
+                self.winner_id = self.group.g_id
+                self.winner_lock.release()
+            self.group.lock.release()
+
         print(f"{self.a_id} suelta lock({prey.x},{prey.y})")
         prey.lock.release()
         if hunt:
@@ -141,13 +156,13 @@ class Predator(Animal):
         pass
 
 class Prey(Animal):
-    def __init__(self, a_id, group, board, winner):
-        super().__init__(a_id, group, board, winner)
+    def __init__(self, a_id, group, board, winner, winner_id, winner_lock, events_queue):
+        super().__init__(a_id, group, board, winner,winner_id, winner_lock,events_queue)
         self.hunted = False
 
 class Lion(Predator):
-    def __init__(self, a_id, group, board, winner):
-        super().__init__(a_id, group, board, winner)
+    def __init__(self, a_id, group, board, winner, winner_id, winner_lock, events_queue):
+        super().__init__(a_id, group, board, winner, winner_id, winner_lock, events_queue)
         self.speed = 0.3
         self.rest_time = 1
 
@@ -177,8 +192,8 @@ class Lion(Predator):
             x -= 1
 
 class Hyena(Predator, Prey):
-    def __init__(self, a_id, group, board, winner):
-        super().__init__(a_id, group, board, winner)
+    def __init__(self, a_id, group, board, winner, winner_id, winner_lock, events_queue):
+        super().__init__(a_id, group, board, winner, winner_id, winner_lock, events_queue)
         self.speed = 0.9
         self.rest_time = 0.7
 
@@ -205,9 +220,14 @@ class Hyena(Predator, Prey):
             sleep(self.speed)
             x -= 1
 
+        if self.hunted:
+            self.group.lock.acquire()
+            self.group.animals.remove(self)
+            self.group.lock.release()
+
 class Zebra(Prey):
-    def __init__(self, a_id, group, board, winner):
-        super().__init__(a_id, group, board, winner)
+    def __init__(self, a_id, group, board, winner, winner_id, winner_lock, events_queue):
+        super().__init__(a_id, group, board, winner, winner_id, winner_lock, events_queue)
         self.speed = 0.5
         self.rest_time = 0.2
 
@@ -219,12 +239,21 @@ class Zebra(Prey):
             sleep(self.speed)
             x -= 1
 
+        if self.hunted:
+            self.event_queue.put(("Spawn Zebra", self))
+            self.group.lock.acquire()
+            self.group.animals.remove(self)
+            self.group.lock.release()
+
+
+
 class Group:
     def __init__(self, g_id):
         self.g_id = g_id
         self.animals = []
+        self.lock = threading.Lock()
 
 class PredatorGroup(Group):
-    def __init__(self, id):
-        super().__init__(id)
+    def __init__(self, g_id):
+        super().__init__(g_id)
         self.hunts = 0
