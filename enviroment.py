@@ -11,7 +11,7 @@ class Game:
         self.lions = {}
         self.hyenas = {}
         self.zebras = {}
-        self.winner = False
+        self.winner = threading.Event()
         self.winner_id = None
         self.winner_lock = threading.Lock()
         self.board = None
@@ -36,8 +36,7 @@ class Game:
         return animal
 
     def event_listener(self):
-        while not self.winner:
-            #time.sleep(0.1)
+        while not self.winner.is_set():
             event,animal = self.events.get()
             if event == "Spawn Zebra":
                 print("-------------------- SPAWN ZEBRA --------------------------------------------------------------")
@@ -50,10 +49,6 @@ class Game:
 
                 t = self.create_animal(Zebra, group, x, y)
                 t.start()                                                                   #   Falta hacer join
-            elif event == "Winner":
-                self.winner = True
-                self.winner_id = animal.group.g_id
-                print("-------------------- GANADOR --------------------------------------------------------------")
 
 
 

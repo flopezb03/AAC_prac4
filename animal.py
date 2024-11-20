@@ -84,7 +84,7 @@ class Animal(threading.Thread):
             y_aux = self.y
             self.y = dest.y
             #actualizar manada
-            if not self.winner:
+            if not self.winner.is_set():
                 print(self.board)
         print(f"{self.a_id} suelta lock({dest.x},{dest.y})")
         dest.lock.release()
@@ -132,13 +132,13 @@ class Predator(Animal):
             self.x = prey.x
             y_aux = self.y
             self.y = prey.y
-            if not self.winner:
+            if not self.winner.is_set():
                 print(self.board)
             self.group.lock.acquire()
             self.group.hunts += 1
-            if self.group.hunts >= 4 and not self.winner_lock.locked():
+            if self.group.hunts >= 20 and not self.winner_lock.locked():
                 self.winner_lock.acquire()
-                self.winner = True
+                self.winner.set()
                 print("-------------------------------------------------- GANADOR ------------------------------------------------------------")
                 self.winner_id = self.group.g_id
                 self.winner_lock.release()
@@ -183,13 +183,11 @@ class Lion(Predator):
             return False
 
     def run(self):
-        x = 10
-        while not self.winner and x > 0:
+        while not self.winner.is_set():
             if not self.hunt():
                 if not self.move():
                     self.rest()
             sleep(self.speed)
-            x -= 1
 
 class Hyena(Predator, Prey):
     def __init__(self, a_id, group, board, winner, winner_id, winner_lock, events_queue):
@@ -212,13 +210,11 @@ class Hyena(Predator, Prey):
             return False
 
     def run(self):
-        x = 10
-        while not self.hunted and not self.winner and x > 0:
+        while not self.hunted and not self.winner.is_set():
             if not self.hunt():
                 if not self.move():
                     self.rest()
             sleep(self.speed)
-            x -= 1
 
         if self.hunted:
             self.group.lock.acquire()
@@ -232,12 +228,10 @@ class Zebra(Prey):
         self.rest_time = 0.2
 
     def run(self):
-        x = 10
-        while not self.hunted and not self.winner and x > 0:
+        while not self.hunted and not self.winner.is_set():
             if not self.move():
                 self.rest()
             sleep(self.speed)
-            x -= 1
 
         if self.hunted:
             self.event_queue.put(("Spawn Zebra", self))
