@@ -12,7 +12,7 @@ class Game:
         self.hyenas = {}
         self.zebras = {}
         self.winner = threading.Event()
-        self.winner_id = None
+        self.winner_group = None
         self.winner_lock = threading.Lock()
         self.board = None
         self.group_id = 0
@@ -29,26 +29,31 @@ class Game:
         return a_id
     def create_animal(self,animal_type,group,x,y):
         self.board.board[y][x].lock.acquire()
-        animal = animal_type(self.incc_animal_id(),group,self.board,self.winner,self.winner_id,self.winner_lock,self.events)
+        animal = animal_type(self.incc_animal_id(), group, self.board, self.winner, self.set_winner_group, self.events)
         self.board.spawn_animal(x,y,animal)
         group.animals.append(animal)
         self.board.board[y][x].lock.release()
         return animal
 
+    def set_winner_group(self,group):
+        with self.winner_lock:
+            self.winner.set()
+            self.winner_group = group
+
     def event_listener(self):
         while not self.winner.is_set():
             event,animal = self.events.get()
             if event == "Spawn Zebra":
-                print("-------------------- SPAWN ZEBRA --------------------------------------------------------------")
+                print("------------------------------------------------ SPAWN ZEBRA --------------------------------------------------------------")
                 #   Crear nueva cebra
-                group = Group(self.incc_group_id())
-                self.zebras[group.g_id] = group
+                group = animal.group
                 x, y = random.randint(0, self.board.w - 1), random.randint(0, self.board.h - 1)
                 while not self.board.is_square_empty(x, y):  # Buscar un lugar vacío
                     x, y = random.randint(0, self.board.w - 1), random.randint(0, self.board.h - 1)
 
                 t = self.create_animal(Zebra, group, x, y)
                 t.start()                                                                   #   Falta hacer join
+
 
 
 
@@ -103,7 +108,7 @@ class Game:
             t.join()
         listener_thread.join()
 
-        print(f"Ganador g_id: {self.winner_id}")
+        print(f"Ganador g_id: {self.winner_group.g_id}")
         print("Lions:")
         for lg in self.lions.values():
             print(len(lg.animals))
