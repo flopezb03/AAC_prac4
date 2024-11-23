@@ -44,7 +44,7 @@ class Game:
     def event_listener(self):
         while not self.winner.is_set():
             event,animal = self.events.get()
-            if event == "Spawn Zebra":
+            if self.winner.is_set() and event == "Spawn Zebra":
                 print("------------------------------------------------ SPAWN ZEBRA --------------------------------------------------------------")
                 #   Crear nueva cebra
                 group = animal.group

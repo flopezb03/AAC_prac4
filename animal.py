@@ -123,6 +123,7 @@ class Predator(Animal):
         print(f"{self.a_id} tiene lock({prey.x},{prey.y}) para cazar")
         hunt = not prey.is_empty() and self.can_hunt(prey)
         if hunt:
+            prey_type = prey.animal.__class__
             prey.animal.hunted = True
             prey.animal = self
             self.board.board[self.y][self.x].animal = None
@@ -133,7 +134,10 @@ class Predator(Animal):
             if not self.winner.is_set():
                 print(self.board)
             self.group.lock.acquire()
-            self.group.hunts += 1
+            if isinstance(self,Lion) and prey_type is Hyena:
+                self.group.hunts += 2
+            else:
+                self.group.hunts += 1
             if self.group.hunts >= 20 and not self.winner.is_set():
                 self.winner_group(self.group)
             self.group.lock.release()
