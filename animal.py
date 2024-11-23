@@ -47,7 +47,7 @@ class Animal(threading.Thread):
                 else:
                     dest_out_group.append(s)
         if len(dest_out_group) == 0 and len(dest_in_group) == 0:
-            print(f"{self.a_id} no se puede mover")
+            #print(f"{self.a_id} no se puede mover")
             self.board.board[self.y][self.x].lock.release()
             return False
 
@@ -55,26 +55,26 @@ class Animal(threading.Thread):
         possible_destinations = None
         if len(dest_out_group) == 0:
             possible_destinations = dest_in_group
-            print(f"{self.a_id} se mueve dentro del grupo")
+            #print(f"{self.a_id} se mueve dentro del grupo")
         elif len(dest_in_group) == 0:
             possible_destinations = dest_out_group
-            print(f"{self.a_id} se mueve fuera del grupo")
+            #print(f"{self.a_id} se mueve fuera del grupo")
         else:
             r = random.random()
             if r > 0.7:
-                print(f"{self.a_id} se mueve fuera del grupo")
+                #print(f"{self.a_id} se mueve fuera del grupo")
                 possible_destinations = dest_out_group
             else:
-                print(f"{self.a_id} se mueve dentro del grupo")
+                #print(f"{self.a_id} se mueve dentro del grupo")
                 possible_destinations = dest_in_group
 
         r = random.randint(0,len(possible_destinations)-1)
         dest = possible_destinations[r]
 
         #   Realizar movimiento
-        print(f"{self.a_id} quiere lock({dest.x},{dest.y}) para mover")
+        #print(f"{self.a_id} quiere lock({dest.x},{dest.y}) para mover")
         dest.lock.acquire()
-        print(f"{self.a_id} tiene lock({dest.x},{dest.y}) para mover")
+        #print(f"{self.a_id} tiene lock({dest.x},{dest.y}) para mover")
         moved = dest.set_animal(self)
         if moved:
             self.board.board[self.y][self.x].animal = None
@@ -82,9 +82,9 @@ class Animal(threading.Thread):
             self.x = dest.x
             y_aux = self.y
             self.y = dest.y
-            if not self.winner.is_set():
-                print(self.board)
-        print(f"{self.a_id} suelta lock({dest.x},{dest.y})")
+            #if not self.winner.is_set():
+                #print(self.board)
+        #print(f"{self.a_id} suelta lock({dest.x},{dest.y})")
         dest.lock.release()
         if moved:
             self.board.board[y_aux][x_aux].lock.release()
@@ -109,7 +109,7 @@ class Predator(Animal):
             if not s.is_empty() and self.can_hunt(s):
                 possible_preys.append(s)
         if len(possible_preys) == 0:
-            print(f"{self.a_id} no puede cazar")
+            #print(f"{self.a_id} no puede cazar")
             self.board.board[self.y][self.x].lock.release()
             return False
 
@@ -118,11 +118,15 @@ class Predator(Animal):
         prey = possible_preys[r]
 
         #   Realizar caza
-        print(f"{self.a_id} quiere lock({prey.x},{prey.y}) para cazar")
+        #print(f"{self.a_id} quiere lock({prey.x},{prey.y}) para cazar")
         prey.lock.acquire()
-        print(f"{self.a_id} tiene lock({prey.x},{prey.y}) para cazar")
+        #print(f"{self.a_id} tiene lock({prey.x},{prey.y}) para cazar")
         hunt = not prey.is_empty() and self.can_hunt(prey)
         if hunt:
+            if not self.winner.is_set():
+                print(f"{self.a_id} en la posicion ({self.x},{self.y}) ha cazado a {prey.animal.a_id} en la posicion ({prey.animal.x},{prey.animal.y})")
+                print(self.board)
+
             prey_type = prey.animal.__class__
             prey.animal.hunted = True
             prey.animal = self
@@ -131,8 +135,7 @@ class Predator(Animal):
             self.x = prey.x
             y_aux = self.y
             self.y = prey.y
-            if not self.winner.is_set():
-                print(self.board)
+
             self.group.lock.acquire()
             if isinstance(self,Lion) and prey_type is Hyena:
                 self.group.hunts += 2
@@ -142,7 +145,7 @@ class Predator(Animal):
                 self.winner_group(self.group)
             self.group.lock.release()
 
-        print(f"{self.a_id} suelta lock({prey.x},{prey.y})")
+        #print(f"{self.a_id} suelta lock({prey.x},{prey.y})")
         prey.lock.release()
         if hunt:
             self.board.board[y_aux][x_aux].lock.release()
