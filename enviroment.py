@@ -39,6 +39,7 @@ class Game:
         with self.winner_lock:
             self.winner.set()
             self.winner_group = group
+            print("--------------------------------- GANADOR ----------------------------------------------")
 
     def event_listener(self):
         while not self.winner.is_set():

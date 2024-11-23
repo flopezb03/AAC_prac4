@@ -6,8 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="5258d976-4535-406e-95ca-f8a4de2b5184" name="Changes" comment="Change winner from &quot;Boolean&quot; to &quot;Event&quot;.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/animal.py" beforeDir="false" afterPath="$PROJECT_DIR$/animal.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/enviroment.py" beforeDir="false" afterPath="$PROJECT_DIR$/enviroment.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
