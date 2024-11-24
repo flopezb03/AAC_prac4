@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5258d976-4535-406e-95ca-f8a4de2b5184" name="Changes" comment="randomize speed and rest_time">
+    <list default="true" id="5258d976-4535-406e-95ca-f8a4de2b5184" name="Changes" comment="init_groups(), init_spawn(), prints">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/animal.py" beforeDir="false" afterPath="$PROJECT_DIR$/animal.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/enviroment.py" beforeDir="false" afterPath="$PROJECT_DIR$/enviroment.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -143,7 +142,15 @@
       <option name="project" value="LOCAL" />
       <updated>1732362850868</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="init_groups(), init_spawn(), prints">
+      <option name="closed" value="true" />
+      <created>1732383217805</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1732383217805</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -155,6 +162,7 @@
     <MESSAGE value="hunted animals are eliminated, new zebras spawned. Winner not well implemented, program does not end" />
     <MESSAGE value="Change winner from &quot;Boolean&quot; to &quot;Event&quot;." />
     <MESSAGE value="randomize speed and rest_time" />
-    <option name="LAST_COMMIT_MESSAGE" value="randomize speed and rest_time" />
+    <MESSAGE value="init_groups(), init_spawn(), prints" />
+    <option name="LAST_COMMIT_MESSAGE" value="init_groups(), init_spawn(), prints" />
   </component>
 </project>

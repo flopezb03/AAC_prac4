@@ -77,12 +77,12 @@ class Game:
                 #   Crear nueva cebra
                 group = animal.group
                 x, y = random.randint(0, self.board.w - 1), random.randint(0, self.board.h - 1)
-                while not self.board.is_square_empty(x, y):  # Buscar un lugar vacío
+                while not self.board.board[y][x].is_empty():
                     x, y = random.randint(0, self.board.w - 1), random.randint(0, self.board.h - 1)
 
                 t = self.create_animal(Zebra, group, x, y)
                 self.all_threads.append(t)
-                t.start()                                                                   #   Falta hacer join
+                t.start()
 
     def init_groups(self, num_lions):
         num_hyenas = num_lions*3
@@ -176,8 +176,6 @@ class Board:
             for y in range(h):
                 self.board[y][x].adjacent_squares = self.adjacent_squares(x,y)
 
-    def is_square_empty(self,x, y):
-        return self.board[y][x].animal is None
     def adjacent_squares(self,x,y):
         if not(0<=x<self.w) or not(0<=y<self.h):
             return []

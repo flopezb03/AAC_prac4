@@ -19,17 +19,7 @@ class Animal(threading.Thread):
 
 
 
-    def inspect(self):
-        possible_squares = []
-        for i in range(-1, 2):
-            for j in range(-1, 2):
-                if not (i == 0 and j == 0):
-                    x = self.x + j
-                    y = self.y + i
-                    if 0 <= x < self.board.w and 0 <= y < self.board.h and self.board.is_square_empty(x, y):
-                        possible_squares.append((x,y))
-        if len(possible_squares) == 0:
-            return False
+
 
     def move(self):
         self.board.board[self.y][self.x].lock.acquire()
