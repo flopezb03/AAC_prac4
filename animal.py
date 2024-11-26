@@ -115,7 +115,8 @@ class Predator(Animal):
         if hunt:
             if not self.winner.is_set():
                 print(f"{self.a_id} en la posicion ({self.x},{self.y}) ha cazado a {prey.animal.a_id} en la posicion ({prey.animal.x},{prey.animal.y})")
-                print(self.board)
+                #print(self.board)
+                self.board.print_location(self.x,self.y)
 
             prey_type = prey.animal.__class__
             prey.animal.hunted = True

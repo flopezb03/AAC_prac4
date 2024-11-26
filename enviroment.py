@@ -54,15 +54,6 @@ class Game:
         return out
 
 
-
-    def create_animal(self,animal_type,group,x,y):
-        self.board.board[y][x].lock.acquire()
-        animal = animal_type(self.incc_animal_id(), group, self.board, self.winner, self.set_winner_group, self.events)
-        self.board.spawn_animal(x,y,animal)
-        group.animals.append(animal)
-        self.board.board[y][x].lock.release()
-        return animal
-
     def set_winner_group(self,group):
         with self.winner_lock:
             self.winner.set()
@@ -79,10 +70,15 @@ class Game:
                 x, y = random.randint(0, self.board.w - 1), random.randint(0, self.board.h - 1)
                 while not self.board.board[y][x].is_empty():
                     x, y = random.randint(0, self.board.w - 1), random.randint(0, self.board.h - 1)
-
-                t = self.create_animal(Zebra, group, x, y)
-                self.all_threads.append(t)
-                t.start()
+                self.board.board[y][x].lock.acquire()
+                z = Zebra(self.incc_animal_id(), group, self.board, self.winner, self.set_winner_group, self.events)
+                self.board.spawn_animal(x,y,z)
+                group.lock.acquire()
+                group.animals.append(z)
+                group.lock.release()
+                self.all_threads.append(z)
+                z.start()
+                self.board.board[y][x].lock.release()
 
     def init_groups(self, num_lions):
         num_hyenas = num_lions*3
@@ -192,6 +188,19 @@ class Board:
         self.board[y][x].animal = a
         a.x = x
         a.y = y
+
+    def print_location(self,x,y):
+        if not(0 <= x < self.w and 0 <= y < self.h):
+            return False
+        out = ""
+        for i in range(-10,11):
+            if 0<=y+i<self.h:
+                line = ""
+                for j in range(-10,11):
+                    if 0<=x+j<self.w:
+                        line += str(self.board[y+i][x+j]) + " "
+                out += line + "\n"
+        print(out)
 
     def __str__(self):
         out = ""
