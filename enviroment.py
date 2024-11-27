@@ -75,13 +75,13 @@ class Game:
                 self.board.board[y][x].lock.release()
                 z.start()
 
-    def init_groups(self, num_lions):
+    def init_groups(self, num_lions, board_w):
         num_hyenas = num_lions*3
         num_zebras = num_lions*6
 
-        self.lions = self.init_groups_type(Lion,num_lions,5,15)
-        self.hyenas = self.init_groups_type(Hyena, num_hyenas, 10, 20)
-        self.zebras = self.init_groups_type(Zebra, num_zebras, 7, 30)
+        self.lions = self.init_groups_type(Lion,num_lions,5,min(15,board_w))
+        self.hyenas = self.init_groups_type(Hyena, num_hyenas, 10, min(20,board_w))
+        self.zebras = self.init_groups_type(Zebra, num_zebras, 7, min(30, board_w))
 
     def init_spawn(self):
         g_queue = queue.Queue()
@@ -112,12 +112,20 @@ class Game:
     def start(self):
 
         print("Tamaño de tablero personalizado? (y/n)")
-        c = "n"
+        c = input()
+        h = 0
+        w = 0
         if c == 'y':
-            print("Altura:")
-            h = int(input())
-            print("Ancho: ")
-            w = int(input())
+            valid_size = False
+            while not valid_size:
+                print("Altura:")
+                h = int(input())
+                print("Ancho: ")
+                w = int(input())
+                if h < 10 or w < 10:
+                    print("El tamaño minimo del tablero debe ser 10x10")
+                else:
+                    valid_size = True
             self.board = Board(h, w)
         elif c == 'n':
             h = 30
@@ -127,10 +135,17 @@ class Game:
             print("Saliendo del programa...")
             exit()
         print("Numero de animales personalizado? (y/n)")
-        c = "n"
+        c = input()
+        num_lions = 0
         if c == 'y':
-            print("Introduce numero de leones:")
-            num_lions = input()
+            valid_lions = False
+            while not valid_lions:
+                print("Introduce numero de leones:")
+                num_lions = input()
+                if 0 < int(num_lions) <= (h*w)/10:
+                    valid_lions = True
+                else:
+                    print("El numero de animales totales es mayor que el numero de casillas")
         elif c == 'n':
             num_lions = int((h * w * 0.3) / 10)
         else:
@@ -138,7 +153,7 @@ class Game:
             exit()
 
 
-        self.init_groups(num_lions)
+        self.init_groups(num_lions,w)
         self.init_spawn()
 
         num_zebras = 0
