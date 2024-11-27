@@ -4,22 +4,17 @@ from time import sleep
 
 
 class Animal(threading.Thread):
-    def __init__(self, a_id, group, board, winner, winner_group, q):
+    def __init__(self, a_id, group, board, winner, game):
         super().__init__()
         self.a_id = a_id
         self.group = group
         self.board = board
         self.winner = winner
-        self.winner_group = winner_group
+        self.game = game
         self.x = None
         self.y = None
         self.speed = 5
         self.rest_time = 5
-        self.event_queue = q
-
-
-
-
 
     def move(self):
         self.board.board[self.y][self.x].lock.acquire()
@@ -133,7 +128,7 @@ class Predator(Animal):
             else:
                 self.group.hunts += 1
             if self.group.hunts >= 20 and not self.winner.is_set():
-                self.winner_group(self.group)
+                self.game.set_winner_group(self.group)
             self.group.lock.release()
 
         #print(f"{self.a_id} suelta lock({prey.x},{prey.y})")
@@ -148,13 +143,13 @@ class Predator(Animal):
         pass
 
 class Prey(Animal):
-    def __init__(self, a_id, group, board, winner, winner_group, events_queue):
-        super().__init__(a_id, group, board, winner, winner_group, events_queue)
+    def __init__(self, a_id, group, board, winner, game):
+        super().__init__(a_id, group, board, winner, game)
         self.hunted = False
 
 class Lion(Predator):
-    def __init__(self, a_id, group, board, winner, winner_group, events_queue):
-        super().__init__(a_id, group, board, winner, winner_group, events_queue)
+    def __init__(self, a_id, group, board, winner, game):
+        super().__init__(a_id, group, board, winner, game)
         self.speed = 0.5 +self.group.speed+random.uniform(0,0.4)
         self.rest_time = 5+self.group.rest_time+random.uniform(0,2)
 
@@ -182,8 +177,8 @@ class Lion(Predator):
             sleep(self.speed)
 
 class Hyena(Predator, Prey):
-    def __init__(self, a_id, group, board, winner, winner_group, events_queue):
-        super().__init__(a_id, group, board, winner, winner_group, events_queue)
+    def __init__(self, a_id, group, board, winner, game):
+        super().__init__(a_id, group, board, winner, game)
         self.speed = 3.9+self.group.speed+random.uniform(0,0.5)
         self.rest_time = 2+self.group.rest_time+random.uniform(0,0.5)
 
@@ -214,8 +209,8 @@ class Hyena(Predator, Prey):
             self.group.lock.release()
 
 class Zebra(Prey):
-    def __init__(self, a_id, group, board, winner, winner_group, events_queue):
-        super().__init__(a_id, group, board, winner, winner_group, events_queue)
+    def __init__(self, a_id, group, board, winner, game):
+        super().__init__(a_id, group, board, winner, game)
         self.speed = 2+self.group.speed+random.uniform(0,0.8)
         self.rest_time = 0.5+self.group.rest_time+random.uniform(0,0.1)
 
@@ -226,7 +221,7 @@ class Zebra(Prey):
             sleep(self.speed)
 
         if self.hunted:
-            self.event_queue.put(("Spawn Zebra", self))
+            self.game.spawn_zebra(self.group)
             self.group.lock.acquire()
             self.group.animals.remove(self)
             self.group.lock.release()

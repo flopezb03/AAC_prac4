@@ -18,7 +18,6 @@ class Game:
         self.board = None
         self.group_id = 0
         self.animal_id = 0
-        self.events = queue.Queue()
 
     def incc_group_id(self):
         g_id = self.group_id
@@ -48,7 +47,7 @@ class Game:
                 group = PredatorGroup(self.incc_group_id())
             out.append(group)
             for i in range(num):
-                a = animal_type(self.incc_animal_id(), group, self.board, self.winner, self.set_winner_group, self.events)
+                a = animal_type(self.incc_animal_id(), group, self.board, self.winner, self)
                 group.animals.append(a)
                 self.all_threads.append(a)
         return out
@@ -60,25 +59,21 @@ class Game:
             self.winner_group = group
             #print("--------------------------------- GANADOR ----------------------------------------------")
 
-    def event_listener(self):
-        while not self.winner.is_set():
-            event,animal = self.events.get()
-            if self.winner.is_set() and event == "Spawn Zebra":
+    def spawn_zebra(self,group):
                 #print("------------------------------------------------ SPAWN ZEBRA --------------------------------------------------------------")
                 #   Crear nueva cebra
-                group = animal.group
                 x, y = random.randint(0, self.board.w - 1), random.randint(0, self.board.h - 1)
                 while not self.board.board[y][x].is_empty():
                     x, y = random.randint(0, self.board.w - 1), random.randint(0, self.board.h - 1)
                 self.board.board[y][x].lock.acquire()
-                z = Zebra(self.incc_animal_id(), group, self.board, self.winner, self.set_winner_group, self.events)
+                z = Zebra(self.incc_animal_id(), group, self.board, self.winner, self)
                 self.board.spawn_animal(x,y,z)
                 group.lock.acquire()
                 group.animals.append(z)
                 group.lock.release()
                 self.all_threads.append(z)
-                z.start()
                 self.board.board[y][x].lock.release()
+                z.start()
 
     def init_groups(self, num_lions):
         num_hyenas = num_lions*3
@@ -146,18 +141,26 @@ class Game:
         self.init_groups(num_lions)
         self.init_spawn()
 
+        num_zebras = 0
+        for g in self.zebras:
+            for z in g.animals:
+                num_zebras += 1
+        print(num_zebras)
+
+
         print("--- ESTADO INICIAL DEL TABLERO ---")
         print(self.board)
 
-        listener_thread = threading.Thread(target=self.event_listener)
-        listener_thread.start()
         for t in self.all_threads:
             t.start()
         for t in self.all_threads:
             t.join()
-        listener_thread.join()
 
-
+        num_zebras = 0
+        for g in self.zebras:
+            for z in g.animals:
+                num_zebras += 1
+        print(num_zebras)
 
         print(f"Ganador g_id: {self.winner_group.g_id}")
 
