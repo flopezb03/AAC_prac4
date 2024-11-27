@@ -155,8 +155,8 @@ class Prey(Animal):
 class Lion(Predator):
     def __init__(self, a_id, group, board, winner, winner_group, events_queue):
         super().__init__(a_id, group, board, winner, winner_group, events_queue)
-        self.speed = random.uniform(0.1,0.5)*self.speed
-        self.rest_time = random.uniform(0.8,1.2)*self.rest_time
+        self.speed = 0.5 +self.group.speed+random.uniform(0,0.4)
+        self.rest_time = 5+self.group.rest_time+random.uniform(0,2)
 
     def can_hunt(self, prey):
         if isinstance(prey.animal,Zebra):
@@ -184,8 +184,8 @@ class Lion(Predator):
 class Hyena(Predator, Prey):
     def __init__(self, a_id, group, board, winner, winner_group, events_queue):
         super().__init__(a_id, group, board, winner, winner_group, events_queue)
-        self.speed = random.uniform(0.7,1.1)*self.speed
-        self.rest_time = random.uniform(0.5,0.9)*self.rest_time
+        self.speed = 3.9+self.group.speed+random.uniform(0,0.5)
+        self.rest_time = 2+self.group.rest_time+random.uniform(0,0.5)
 
     def can_hunt(self, prey):
         if isinstance(prey.animal,Zebra):
@@ -216,8 +216,8 @@ class Hyena(Predator, Prey):
 class Zebra(Prey):
     def __init__(self, a_id, group, board, winner, winner_group, events_queue):
         super().__init__(a_id, group, board, winner, winner_group, events_queue)
-        self.speed = random.uniform(0.3,0.7)*self.speed
-        self.rest_time = random.uniform(0.01,0.4)*self.rest_time
+        self.speed = 2+self.group.speed+random.uniform(0,0.8)
+        self.rest_time = 0.5+self.group.rest_time+random.uniform(0,0.1)
 
     def run(self):
         while not self.hunted and not self.winner.is_set():
@@ -238,6 +238,8 @@ class Group:
         self.g_id = g_id
         self.animals = []
         self.lock = threading.Lock()
+        self.speed = random.uniform(0,1)
+        self.rest_time = random.uniform(0,0.5)
 
 class PredatorGroup(Group):
     def __init__(self, g_id):
