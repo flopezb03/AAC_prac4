@@ -108,6 +108,13 @@ class Game:
                     self.board.spawn_animal(x+i,y,g.animals[i])
                 x += len(g.animals) +1
 
+    def board_printer(self):
+        #print("START_PRINTER")
+        while not self.winner.is_set():
+            #print("PRINT")
+            print(self.board)
+            time.sleep(1)
+
 
     def start(self):
 
@@ -137,15 +144,18 @@ class Game:
         print("Numero de animales personalizado? (y/n)")
         c = input()
         num_lions = 0
+        max_lions = int((0.3 * h * w) / 10)
         if c == 'y':
             valid_lions = False
             while not valid_lions:
                 print("Introduce numero de leones:")
-                num_lions = input()
-                if 0 < int(num_lions) <= (h*w)/10:
-                    valid_lions = True
+                num_lions = int(input())
+                if num_lions <= 0:
+                    print("Numero de leones no puede ser <= 0")
+                elif num_lions > max_lions:
+                    print(f"Numero de leones muy elevado para el tablero seleccionado. Maximo: {max_lions}")
                 else:
-                    print("El numero de animales totales es mayor que el numero de casillas")
+                    valid_lions = True
         elif c == 'n':
             num_lions = int((h * w * 0.3) / 10)
         else:
@@ -156,26 +166,19 @@ class Game:
         self.init_groups(num_lions,w)
         self.init_spawn()
 
-        num_zebras = 0
-        for g in self.zebras:
-            for z in g.animals:
-                num_zebras += 1
-        print(num_zebras)
-
 
         print("--- ESTADO INICIAL DEL TABLERO ---")
         print(self.board)
+
+        printer = threading.Thread(target=self.board_printer)
+        printer.start()
 
         for t in self.all_threads:
             t.start()
         for t in self.all_threads:
             t.join()
 
-        num_zebras = 0
-        for g in self.zebras:
-            for z in g.animals:
-                num_zebras += 1
-        print(num_zebras)
+        printer.join()
 
         print(f"Ganador g_id: {self.winner_group.g_id}")
 

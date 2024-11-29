@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5258d976-4535-406e-95ca-f8a4de2b5184" name="Changes" comment="Now animals have access to game.&#10;predator dont have a reference to a game method and they can access to it via game.&#10;zebra spawn changed. There is not event queue, que call a game method directly to create a new zebra">
+    <list default="true" id="5258d976-4535-406e-95ca-f8a4de2b5184" name="Changes" comment="changed max size of groups.&#10;restrictions in the input values">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/animal.py" beforeDir="false" afterPath="$PROJECT_DIR$/animal.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/enviroment.py" beforeDir="false" afterPath="$PROJECT_DIR$/enviroment.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -174,7 +175,15 @@
       <option name="project" value="LOCAL" />
       <updated>1732720478407</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="changed max size of groups.&#10;restrictions in the input values">
+      <option name="closed" value="true" />
+      <created>1732725996745</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1732725996745</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -190,6 +199,7 @@
     <MESSAGE value="refactoring" />
     <MESSAGE value="animal speed and rest_time changed. Now they are calculated with a random group speed/rest_time and constant values given by his animal type" />
     <MESSAGE value="Now animals have access to game.&#10;predator dont have a reference to a game method and they can access to it via game.&#10;zebra spawn changed. There is not event queue, que call a game method directly to create a new zebra" />
-    <option name="LAST_COMMIT_MESSAGE" value="Now animals have access to game.&#10;predator dont have a reference to a game method and they can access to it via game.&#10;zebra spawn changed. There is not event queue, que call a game method directly to create a new zebra" />
+    <MESSAGE value="changed max size of groups.&#10;restrictions in the input values" />
+    <option name="LAST_COMMIT_MESSAGE" value="changed max size of groups.&#10;restrictions in the input values" />
   </component>
 </project>
