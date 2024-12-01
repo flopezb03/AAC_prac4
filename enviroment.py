@@ -9,6 +9,7 @@ from animal import PredatorGroup, Lion, Group, Zebra, Hyena
 class Game:
     def __init__(self):
         self.all_threads = []
+        self.all_threads_lock = threading.Lock()
         self.lions = []
         self.hyenas = []
         self.zebras = []
@@ -57,11 +58,8 @@ class Game:
         with self.winner_lock:
             self.winner.set()
             self.winner_group = group
-            #print("--------------------------------- GANADOR ----------------------------------------------")
 
     def spawn_zebra(self,group):
-                #print("------------------------------------------------ SPAWN ZEBRA --------------------------------------------------------------")
-                #   Crear nueva cebra
                 x, y = random.randint(0, self.board.w - 1), random.randint(0, self.board.h - 1)
                 while not self.board.board[y][x].is_empty():
                     x, y = random.randint(0, self.board.w - 1), random.randint(0, self.board.h - 1)
@@ -71,7 +69,8 @@ class Game:
                 group.lock.acquire()
                 group.animals.append(z)
                 group.lock.release()
-                self.all_threads.append(z)
+                with self.all_threads_lock:
+                    self.all_threads.append(z)
                 self.board.board[y][x].lock.release()
                 z.start()
 
@@ -129,14 +128,14 @@ class Game:
                 h = int(input())
                 print("Ancho: ")
                 w = int(input())
-                if h < 10 or w < 10:
-                    print("El tamaño minimo del tablero debe ser 10x10")
+                if 75 < h < 10 or 75 < w < 10:
+                    print("El tamaño debe estar entre 10x10 y 75x75")
                 else:
                     valid_size = True
             self.board = Board(h, w)
         elif c == 'n':
-            h = 30
-            w = 30
+            h = 75
+            w = 75
             self.board = Board(h, w)
         else:
             print("Saliendo del programa...")
@@ -150,8 +149,8 @@ class Game:
             while not valid_lions:
                 print("Introduce numero de leones:")
                 num_lions = int(input())
-                if num_lions <= 0:
-                    print("Numero de leones no puede ser <= 0")
+                if num_lions < 2:
+                    print("Numero de leones no puede ser < 2")
                 elif num_lions > max_lions:
                     print(f"Numero de leones muy elevado para el tablero seleccionado. Maximo: {max_lions}")
                 else:
@@ -168,7 +167,6 @@ class Game:
 
 
         print("--- ESTADO INICIAL DEL TABLERO ---")
-        print(self.board)
 
         printer = threading.Thread(target=self.board_printer)
         printer.start()
@@ -179,8 +177,13 @@ class Game:
             t.join()
 
         printer.join()
-
-        print(f"Ganador g_id: {self.winner_group.g_id}")
+        print(self.board)
+        print("\n--- GANADOR ENCONTRADO ---")
+        if isinstance(self.winner_group.animals[0],Lion):
+            print("Manada de leones")
+        else:
+            print("Manada de hienas")
+        print(f"g_id de la manada: {self.winner_group.g_id}")
 
 
 
@@ -210,18 +213,6 @@ class Board:
         a.x = x
         a.y = y
 
-    def print_location(self,x,y):
-        if not(0 <= x < self.w and 0 <= y < self.h):
-            return False
-        out = ""
-        for i in range(-10,11):
-            if 0<=y+i<self.h:
-                line = ""
-                for j in range(-10,11):
-                    if 0<=x+j<self.w:
-                        line += str(self.board[y+i][x+j]) + " "
-                out += line + "\n"
-        print(out)
 
     def __str__(self):
         out = ""
@@ -263,7 +254,7 @@ class Square:
             if isinstance(self.animal,Lion):
                 return "L"
             elif isinstance(self.animal,Zebra):
-                return "Z"
+                return "C"
             elif isinstance(self.animal,Hyena):
                 return "H"
         else:
