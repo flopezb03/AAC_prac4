@@ -104,7 +104,8 @@ class Predator(Animal):
                     p = "Hiena"
                 else:
                     p = "Cebra"
-                print(f"{c} {self.a_id} en la posicion ({self.x},{self.y}) ha cazado a {p} {prey.animal.a_id} en la posicion ({prey.animal.x},{prey.animal.y})")
+                with self.game.printer_lock:
+                    print(f"{c} {self.a_id} en la posicion ({self.x},{self.y}) ha cazado a {p} {prey.animal.a_id} en la posicion ({prey.animal.x},{prey.animal.y})")
 
             prey_type = prey.animal.__class__
             prey.animal.hunted = True

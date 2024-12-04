@@ -19,6 +19,7 @@ class Game:
         self.board = None
         self.group_id = 0
         self.animal_id = 0
+        self.printer_lock = threading.Lock()
 
     def incc_group_id(self):
         g_id = self.group_id
@@ -108,10 +109,9 @@ class Game:
                 x += len(g.animals) +1
 
     def board_printer(self):
-        #print("START_PRINTER")
         while not self.winner.is_set():
-            #print("PRINT")
-            print(self.board)
+            with self.printer_lock:
+                print(self.board)
             time.sleep(1)
 
 
